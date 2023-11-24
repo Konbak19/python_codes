@@ -1,0 +1,44 @@
+import pandas as pd
+from glob import glob
+from bs4 import BeautifulSoup
+import re
+
+l = list()
+
+for f in glob('*.xml'):
+    with open(f, 'r') as xml_file:
+        xml = xml_file.read()
+
+    soup = BeautifulSoup(xml, "lxml")
+    all_articles = soup.findAll('pubmedarticle')
+
+    for article in all_articles:
+        pub = dict()
+
+        # Extract PMID
+        pub['PMID'] = article.find('pmid').text.strip() if article.find('pmid') else None
+
+        # Extract PMCID with the specified format
+        pmcid_element = article.find('articleid', attrs={"idtype": "pmc"})
+        pmcid_text = pmcid_element.text.strip() if pmcid_element else None
+        valid_pmcid = pmcid_text if pmcid_text is None or re.match(r'^PMC\d+$', pmcid_text) else None
+        pub['PMCID'] = valid_pmcid
+
+        # Extract Publication Type
+        pub_list = article.find('publicationtypelist')
+        pub['Publication_type'] = [pub_type.text.strip() for pub_type in pub_list.findAll('publicationtype')]
+
+        # Extract NCTID
+        accession_number_element = article.find('accessionnumber')
+        pub['NCTID'] = accession_number_element.text.strip() if accession_number_element else None
+
+        l.append(pub)
+
+# Create DataFrame
+df = pd.DataFrame(l)
+df = df.explode('Publication_type', ignore_index=True)
+
+# Print DataFrame
+print(df)
+
+#Notes, some PMCIDs have beeen assigned to articles that havent yet been published(so if you try to search them by their pmcid they will not appear)
