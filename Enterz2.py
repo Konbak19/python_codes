@@ -33,23 +33,6 @@ worksheet = workbook.add_worksheet()
 # Define headers for the Excel file
 headers = ['PubMed ID', 'Title', 'Abstract']
 
-def pmid2pmcid(email, pmid):
-    Entrez.email = email
-
-    handle = Entrez.elink(dbfrom="pubmed", db="pmc", linkname="pubmed_pmc", id=pmid, retmode="text")
-
-    handle_read = handle.read()
-    handle.close()
-
-    root = ET.fromstring(handle_read)
-
-    pmcid = ""
-
-    for link in root.iter('Link'):
-        for id in link.iter('Id'):
-            pmcid = id.text
-    return pmcid
-
 # Write the headers to the first row of the worksheet
 for col, header in enumerate(headers):
     worksheet.write(0, col, header)
@@ -87,7 +70,7 @@ try:
             # Save the abstract to a text file
             abstract_file_path = os.path.join(abstract_folder_path, f"{pmid}_abstract.txt")
             with open(abstract_file_path, 'w', encoding='utf-8') as abstract_file:
-                abstract_file.write(f"PubMed ID: {pmid}\nTitle: {title}\nAbstract:\n{abstract}\n")
+                abstract_file.write(f"{abstract}")
 
             # Increment row counter
             row += 1
