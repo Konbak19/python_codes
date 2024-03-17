@@ -1,0 +1,42 @@
+import numpy as np
+import re
+
+dna = """
+AGTACGATCGATCGATCGATCGATCGCTAGACGT
+TGACGTACGTACGTAGCTAGCTAGCTAGCATGC
+ATCGATCGATCGATCGATCGATCGATCGATCGA
+"""
+t = 5
+l = 3
+def isolate_dna_sequences(text_input):
+    dna_sequences = []
+    pattern = re.compile('[ACGT]+', re.IGNORECASE)
+
+    for line in text_input.split('\n'):
+        sequences = pattern.findall(line)
+        dna_sequences.extend(sequences)
+
+    return dna_sequences
+
+sequences = isolate_dna_sequences(dna)
+#print(sequences[0])
+
+
+def MotifMaker(seq, t):
+    window = []
+    for i in range(0, len(seq)-t, 1):
+        win = seq[i:i + t]
+        window.append(win)
+    return window
+                
+motif_dict = {}  # Create an empty dictionary to store arrays
+for i in range(0, l):
+    motif_name = f"motif_{i}"
+    motif_dict[motif_name] = MotifMaker(sequences[i], t)  # Create array and store in dictionary
+
+# Access motifs outside the loop
+for motif_name in motif_dict.keys():
+    current_motif = motif_dict[motif_name]  # Access motif using its key
+    # Do something with current_motif (e.g., print, analyze, etc.)
+    print(f"Motif {motif_name}: {current_motif}")  # Example: Print motif name and content
+    print('\n')
